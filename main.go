@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/TF2Stadium/wsevent"
 	"github.com/dgrijalva/jwt-go"
@@ -21,7 +22,12 @@ var (
 	})
 )
 
+var (
+	addr = flag.String("addr", ":8080", "server address")
+)
+
 func main() {
+	flag.Parse()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "views/index.html")
 	})
@@ -31,10 +37,17 @@ func main() {
 	})
 
 	http.HandleFunc("/connect", SocketHandler)
-	go http.ListenAndServe("0:8080", nil)
+	log.Printf("hosting on %s", *addr)
+
+	go func() {
+		if err := http.ListenAndServe(*addr, nil); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	server.OnDisconnect = func(string, *jwt.Token) {
 		log.Println("client disconnected")
 	}
+
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter text: ")
