@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func sendMessage(id int, message string) error {
+func sendMessage(id int, data interface{}) error {
 	clientListMu.RLock()
 	if id >= len(clientList) || id < -1 {
 		return errors.New("invalid id")
@@ -13,8 +13,8 @@ func sendMessage(id int, message string) error {
 	clientListMu.RUnlock()
 
 	so.EmitJSON(struct {
-		Request string `json:"request"`
-		Data    string `json:"data"`
-	}{"message", message})
+		Request string      `json:"request"`
+		Data    interface{} `json:"data"`
+	}{"message", data})
 	return nil
 }
