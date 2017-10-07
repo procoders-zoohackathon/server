@@ -2,17 +2,20 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/csv"
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/TF2Stadium/wsevent"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
+
+	"github.com/TF2Stadium/wsevent"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/websocket"
+	"github.com/procoders-zoohackathon/server/reader"
 )
 
 var (
@@ -49,20 +52,22 @@ func main() {
 	}
 
 	for {
-		reader := bufio.NewReader(os.Stdin)
+		rdr := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter text: ")
-		text, _ := reader.ReadString('\n')
-		params := strings.Split(text, ",")
-		if len(params) != 2 {
-			log.Print("invalid message format")
-			continue
-		}
-		id, err := strconv.Atoi(params[0])
+		text, _ := rdr.ReadString('\n')
+		values, err := csv.NewReader(bytes.NewReader([]byte(text))).Read()
+		id, err := strconv.Atoi(values[0])
 		if err != nil {
 			log.Print(err)
 			continue
 		}
-		if err := sendMessage(id, params[1]); err != nil {
+
+		alert, err := reader.NewAlert(values[1:])
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		if err := sendMessage(id, *alert); err != nil {
 			log.Print(err)
 		}
 	}
