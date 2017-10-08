@@ -30,6 +30,7 @@ type Alert struct {
 	Type     string    `json:"type"`
 	Time     time.Time `json:"time"`
 	Location LatLon    `json:"location"`
+	Message  string    `json:"message"`
 }
 
 func NewAlert(values []string) (*Alert, error) {
@@ -114,5 +115,6 @@ func NewAlert(values []string) (*Alert, error) {
 		return nil, ErrInvalidLocation
 	}
 
+	alert.Message = values[5]
 	return alert, nil
 }
