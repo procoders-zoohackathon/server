@@ -115,6 +115,7 @@ func NewAlert(values []string) (*Alert, error) {
 		return nil, ErrInvalidLocation
 	}
 
+	values[5] = strings.TrimSpace(values[5])
 	alert.Message = strings.TrimPrefix(values[5], "LABELLED AS")
 	return alert, nil
 }
